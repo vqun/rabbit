@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Rabbit Demo</title>
+</head>
+<body>
+	<a href="#index">Index</a>
+	<a href="#demo">Demo</a>
+</body>
+<script type="text/javascript" src="../build/rabbit.js"></script>
+<script type="text/javascript">
+	(function(Global, Base){
+		this.App = new Base.Controller({
+			"VIEW_BASE": "rabbit/demo/views"
+		})
+	})(this, Base);
+</script>
+</html>
