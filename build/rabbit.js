@@ -2,24 +2,24 @@
  *@name     rabbitJs
  *@desc     An Extremely Simple MVC Library used for SPA.
  *@author   VeeQun
- *@modified 2014-04-30
+ *@modified 2014-05-04
  *@license  MIT
  */
 (function(Global) {
     var CachedJs = {};
     var HEAD = document.getElementsByTagName("head")[0];
+    var BASE = HEAD.getElementsByTagName("base")[0];
     function require(uri, callback) {
         var modId = makeModuleId(uri);
 
-        var cached = CachedJs[uri];
+        var cached = CachedJs[modId];
         if(cached) {
             if(cached.loaded)
                 return callback(cached.exports)
             if(cached.loading)
                 return cached.module.addCallBack(callback)
         }
-        CachedJs[modId] = {};
-        var $mod = CachedJs[modId];
+        var $mod = CachedJs[modId] = {};
         $mod.uri = uri;
         return ($mod.module = new Module(fullURI(uri), modId, callback)).load();
     }
@@ -27,17 +27,17 @@
         "HOST": "\/",
         "BASE": ""
     }
-    function define(mod) {
-        if(typeof mod == "function")
-            define.exports = mod();
+    function define(handler) {
+        if(typeof handler == "function")
+            define.exports = handler();
         else
-            define.exports = mod;
+            define.exports = handler;
     }
     function Module(uri, id, callback){
         Maker.apply(this, arguments);
     }
     Module.prototype.load = function() {
-        HEAD.appendChild(this.tag)
+        BASE?HEAD.inserBefore(this.tag, BASE):HEAD.appendChild(this.tag)
     }
     Module.prototype.destroy = function() {
         HEAD.removeChild(this.tag)
@@ -86,12 +86,15 @@
         return true;
 
         function complete() {
-            var modExports = define.exports || {};
+            var modExports = define.exports;
+            if(!modExports) return false;
             delete define.exports;
             var cbList = mod.callbackList;
             for(var k = cbList.length; k; ) {
                 cbList[--k](modExports)
             }
+            CachedJs[mod.id].exports = modExports;
+            modExports = null;
         }
         function error() {
             throw "Error: file load failed"
@@ -156,21 +159,66 @@
             }
         }
         return klass;
-
         function _extend(o) {
             for(var k in o) {
                 this[k] = o[k]
             }
         }
     }
-
     Base.Utils = Base.create();
     Base.Utils.extend({
         "JSON": Global.JSON || {
             "parse": function(jsonString) {
                 eval("return ("+jsonString+")")
             },
-            "stringify": function(json) {}
+            "stringify": function(json) {
+                return stringified(json);
+                function stringified(source) {
+                    var type = Object.prototype.toString.call(source).slice(8, -1);
+                    switch(type) {
+                    case "String":
+                        return ("\"" + source.toString() + "\"");
+                    case "Date":
+                        return ("\"" + (source.toJSON?source.toJSON():dateJSON(source)) + "\"");
+                    case "Array":
+                        return arrStringify(source);
+                    case "Object":
+                        return objStringify(source);
+                    case "Function":
+                    case "Undefined":
+                        return "null";
+                    default:
+                        return source.toString()
+                    }
+                }
+                function objStringify(obj) {
+                    var ret = [];
+                    for(var k in obj) {
+                        ret.push("\"" + k + "\":" + stringified(obj[k]))
+                    }
+                    return "{"+ret.join(",")+"}"
+                }
+                function arrStringify(arr) {
+                    var ret = [];
+                    for(var k = 0, len = arr.length; k < len; k++) {
+                        ret.push(stringified(arr[k]))
+                    }
+                    return "[" +ret.join(",") + "]"
+                }
+                function dateJSON(date) {
+                    return isFinite(date.valueOf())
+                    ?   date.getUTCFullYear() + "-" +
+                        zero(date.getUTCMonth() + 1) + '-' +
+                        zero(date.getUTCDate())      + 'T' +
+                        zero(date.getUTCHours())     + ':' +
+                        zero(date.getUTCMinutes())   + ':' +
+                        zero(date.getUTCSeconds())   + 'Z'
+                    :   null;
+                    function zero(n) {
+                        return n < 10 ? '0' + n : n;
+                    }
+                }
+            }
         },
         "queryToJson": function(query) {
             var jsonStr = query.replace(/\&/g, ",").replace(/\=/g, ":");
@@ -187,7 +235,7 @@
             }
         })()
     });
-    Global.Base = Base
+    Global.Rabbit = Base
 })(this);
 (function(Global, Base){
     var JSON = Base.Utils.JSON;
@@ -220,7 +268,7 @@
         }
     });
     Base.Model = Model
-})(this, Base);
+})(this, Rabbit);
 (function(Global, Base){
     var IS = Base.Utils.is;
     var View = new Base.Class({
@@ -247,7 +295,7 @@
         "start": function() {}
     });
     Base.View = View
-})(this, Base);
+})(this, Rabbit);
 (function(Global, Base) {
     var Controller = new Base.Class({
         "__constructor__": function(config) {
@@ -261,6 +309,7 @@
             };
         },
         "__init__": function() {
+            this.hashChange();
             Global.onhashchange = this.proxy(this.hashChange);
         }
     });
@@ -319,7 +368,7 @@
         "getViewInfo": function() {
             var hash = location.hash.split("?");
             return {
-                "path": hash[0].replace("#", "\/") || this.config.VIEW_DEFAULT,
+                "path": (hash[0]|| "#"+this.config.VIEW_DEFAULT).replace("#", "\/"),
                 "query": hash[1]||""
             }
         },
@@ -341,4 +390,4 @@
         })()
     });
     Base.Controller = Controller
-})(this, Base);
+})(this, Rabbit);

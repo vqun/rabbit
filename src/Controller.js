@@ -11,6 +11,7 @@
             };
         },
         "__init__": function() {
+            this.hashChange();
             Global.onhashchange = this.proxy(this.hashChange);
         }
     });
@@ -69,7 +70,7 @@
         "getViewInfo": function() {
             var hash = location.hash.split("?");
             return {
-                "path": hash[0].replace("#", "\/") || this.config.VIEW_DEFAULT,
+                "path": (hash[0]|| "#"+this.config.VIEW_DEFAULT).replace("#", "\/"),
                 "query": hash[1]||""
             }
         },
@@ -91,4 +92,4 @@
         })()
     });
     Base.Controller = Controller
-})(this, Base);
+})(this, Rabbit);

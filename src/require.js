@@ -1,18 +1,18 @@
 (function(Global) {
     var CachedJs = {};
     var HEAD = document.getElementsByTagName("head")[0];
+    var BASE = HEAD.getElementsByTagName("base")[0];
     function require(uri, callback) {
         var modId = makeModuleId(uri);
 
-        var cached = CachedJs[uri];
+        var cached = CachedJs[modId];
         if(cached) {
             if(cached.loaded)
                 return callback(cached.exports)
             if(cached.loading)
                 return cached.module.addCallBack(callback)
         }
-        CachedJs[modId] = {};
-        var $mod = CachedJs[modId];
+        var $mod = CachedJs[modId] = {};
         $mod.uri = uri;
         return ($mod.module = new Module(fullURI(uri), modId, callback)).load();
     }
@@ -20,17 +20,17 @@
         "HOST": "\/",
         "BASE": ""
     }
-    function define(mod) {
-        if(typeof mod == "function")
-            define.exports = mod();
+    function define(handler) {
+        if(typeof handler == "function")
+            define.exports = handler();
         else
-            define.exports = mod;
+            define.exports = handler;
     }
     function Module(uri, id, callback){
         Maker.apply(this, arguments);
     }
     Module.prototype.load = function() {
-        HEAD.appendChild(this.tag)
+        BASE?HEAD.inserBefore(this.tag, BASE):HEAD.appendChild(this.tag)
     }
     Module.prototype.destroy = function() {
         HEAD.removeChild(this.tag)
@@ -79,12 +79,15 @@
         return true;
 
         function complete() {
-            var modExports = define.exports || {};
+            var modExports = define.exports;
+            if(!modExports) return false;
             delete define.exports;
             var cbList = mod.callbackList;
             for(var k = cbList.length; k; ) {
                 cbList[--k](modExports)
             }
+            CachedJs[mod.id].exports = modExports;
+            modExports = null;
         }
         function error() {
             throw "Error: file load failed"

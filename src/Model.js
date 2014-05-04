@@ -29,4 +29,4 @@
         }
     });
     Base.Model = Model
-})(this, Base);
+})(this, Rabbit);

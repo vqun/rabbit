@@ -1,5 +1,5 @@
 define(function() {
-	var View = new Base.View({
+	var View = new Rabbit.View({
 		"onCreate": function() {
 			console.log("demo:created")
 		},

@@ -24,4 +24,4 @@
         "start": function() {}
     });
     Base.View = View
-})(this, Base);
+})(this, Rabbit);
