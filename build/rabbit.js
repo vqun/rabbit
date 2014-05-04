@@ -90,7 +90,7 @@
             var modExports = define.exports;
             if(!modExports) return false;
             delete define.exports;
-            this.destroy();
+            mod.destroy();
             var cbList = mod.callbackList;
             for(var k = cbList.length; k; ) {
                 cbList[--k](modExports)
