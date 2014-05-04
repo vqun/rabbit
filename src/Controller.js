@@ -78,7 +78,7 @@
             return this.config.VIEW_HOST + this.config.VIEW_BASE + viewpath
         },
         "createContainer": (function() {
-            var id = 0, prefix = "saber-view-";
+            var id = 0, prefix = "rabbit-view-";
             return function() {
                 var viewContainer = document.createElement("div");
                 var viewConId = prefix + ++id;

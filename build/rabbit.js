@@ -1,9 +1,10 @@
 /*
- *@name     rabbitJs
- *@desc     An Extremely Simple MVC Library used for SPA.
- *@author   VeeQun
- *@modified 2014-05-04
- *@license  MIT
+ *@name Rabbit
+ *@version v0.1.0
+ *@desc An Extremely Simple MVC Library used for SPA.
+ *@author VeeQun
+ *@license MIT
+ *@date 2014-05-04
  */
 (function(Global) {
     var CachedJs = {};
@@ -89,6 +90,7 @@
             var modExports = define.exports;
             if(!modExports) return false;
             delete define.exports;
+            this.destroy();
             var cbList = mod.callbackList;
             for(var k = cbList.length; k; ) {
                 cbList[--k](modExports)
@@ -376,7 +378,7 @@
             return this.config.VIEW_HOST + this.config.VIEW_BASE + viewpath
         },
         "createContainer": (function() {
-            var id = 0, prefix = "saber-view-";
+            var id = 0, prefix = "rabbit-view-";
             return function() {
                 var viewContainer = document.createElement("div");
                 var viewConId = prefix + ++id;
