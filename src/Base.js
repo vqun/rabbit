@@ -47,7 +47,9 @@
     Base.Utils.extend({
         "JSON": Global.JSON || {
             "parse": function(jsonString) {
-                eval("return ("+jsonString+")")
+                var ret = null;
+                eval("ret=("+jsonString+")");
+                return ret
             },
             "stringify": function(json) {
                 return stringified(json);
@@ -99,7 +101,7 @@
             }
         },
         "queryToJson": function(query) {
-            var jsonStr = query.replace(/\&/g, ",").replace(/\=/g, ":");
+            var jsonStr = "{"+query.replace(/\&/g, ",").replace(/\=/g, ":").replace(/(\w+)/gim, "\"$1\"")+"}";
             return jsonStr && this.JSON.parse(jsonStr)
         },
         "clear": function(str) {

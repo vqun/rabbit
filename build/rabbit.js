@@ -1,10 +1,10 @@
 /*
- *@name Rabbit
- *@version v0.1.0
- *@desc An Extremely Simple MVC Library used for SPA.
- *@author VeeQun
- *@license MIT
- *@date 2014-05-04
+ *@name     Rabbit
+ *@version  
+ *@desc     An Extremely Simple MVC Library used for SPA.
+ *@author   VeeQun
+ *@license  MIT
+ *@modified 2014-05-12
  */
 (function(Global) {
     var CachedJs = {};
@@ -171,7 +171,9 @@
     Base.Utils.extend({
         "JSON": Global.JSON || {
             "parse": function(jsonString) {
-                eval("return ("+jsonString+")")
+                var ret = null;
+                eval("ret=("+jsonString+")");
+                return ret
             },
             "stringify": function(json) {
                 return stringified(json);
@@ -223,7 +225,7 @@
             }
         },
         "queryToJson": function(query) {
-            var jsonStr = query.replace(/\&/g, ",").replace(/\=/g, ":");
+            var jsonStr = "{"+query.replace(/\&/g, ",").replace(/\=/g, ":").replace(/(\w+)/gim, "\"$1\"")+"}";
             return jsonStr && this.JSON.parse(jsonStr)
         },
         "clear": function(str) {
