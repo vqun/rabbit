@@ -11,6 +11,10 @@
             };
         },
         "__init__": function() {
+            require.config = {
+                "host": this.config.VIEW_HOST,
+                "baseUrl": this.config.VIEW_BASE
+            };
             this.hashChange();
             Global.onhashchange = this.proxy(this.hashChange);
         }
@@ -22,7 +26,7 @@
         },
         "switchView": function(viewInfo){
             var view = null;
-            var viewUri = this.getViewUri(viewInfo.path);
+            var viewUri = viewInfo.path;
             var viewRouter = this.router[viewUri] || (this.router[viewUri] = {});
             if(!(view = viewRouter.view)) {
                 require(viewUri, this.proxy(loadView));
