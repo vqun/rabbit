@@ -145,4 +145,4 @@
   }
   context.require = require;
   context.define = define;
-})(this)
+})(this);

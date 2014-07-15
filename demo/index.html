@@ -13,7 +13,11 @@
 	(function(Global, Base){
 		this.App = new Base.Controller({
 			"VIEW_BASE": "rabbit/demo/views"
-		})
+		});
+		this.Test = new Base.Store({
+			"name": "Test"
+		});
+		console.log(Test)
 	})(this, Rabbit);
 </script>
 </html>

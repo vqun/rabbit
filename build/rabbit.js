@@ -4,7 +4,7 @@
  *@desc     An Extremely Simple MVC Library used for SPA.
  *@author   VeeQun
  *@license  MIT
- *@modified 2014-05-22
+ *@modified 2014-06-25
  */
 (function(context, undefined) {
   var emptyFunc = function(){};
@@ -153,8 +153,8 @@
   }
   context.require = require;
   context.define = define;
-})(this)
-(function(Global) {
+})(this);
+(function(context) {
     var Base = {};
     Base.create = function(proto) {
         proto = proto || {};
@@ -201,7 +201,7 @@
     }
     Base.Utils = Base.create();
     Base.Utils.extend({
-        "JSON": Global.JSON || {
+        "JSON": context.JSON || {
             "parse": function(jsonString) {
                 var ret = null;
                 eval("ret=("+jsonString+")");
@@ -271,36 +271,23 @@
             }
         })()
     });
-    Global.Rabbit = Base
+    context.Rabbit = Base
 })(this);
 (function(Global, Base){
     var JSON = Base.Utils.JSON;
     var IS = Base.Utils.is;
     var Model = new Base.Class({
         "__constructor__": function() {
-            this.name;
         },
         "__propertys__": function(config) {
-            this.name = config.name;
         },
         "__init__": function() {
-            localStorage.setItem(this.name, "")
         }
     });
     Model.fn.extend({
         "get": function() {
-            return JSON.parse(localStorage.getItem(this.name))
         },
         "set": function(data) {
-            var store = this.get();
-            if(IS(store, "array")){
-                store = store.concat(data)
-            }else {
-                for(var k in data) {
-                    store[k] = data[k]
-                }
-            }
-            localStorage.setItem(this.name, JSON.stringify(store))
         }
     });
     Base.Model = Model
@@ -430,4 +417,38 @@
         })()
     });
     Base.Controller = Controller
+})(this, Rabbit);
+(function(Global, Base){
+    var JSON = Base.Utils.JSON;
+    var IS = Base.Utils.is;
+    var Store = new Base.Class({
+        "__constructor__": function() {
+            this.name;
+        },
+        "__propertys__": function(config) {
+            config = config || {};
+            this.name = config.name || Math.random().toString(16).slice(2).toUpperCase();
+        },
+        "__init__": function() {
+            localStorage.setItem(this.name, "")
+        }
+    });
+    Store.fn.extend({
+        "get": function(name) {
+            name = name || this.name;
+            return JSON.parse(localStorage.getItem(this.name))
+        },
+        "set": function(name, data) {
+            var store = this.get();
+            if(IS(store, "array")){
+                store = store.concat(data)
+            }else {
+                for(var k in data) {
+                    store[k] = data[k]
+                }
+            }
+            localStorage.setItem(this.name, JSON.stringify(store))
+        }
+    });
+    Base.Store = Store
 })(this, Rabbit);
