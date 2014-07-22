@@ -1,4 +1,5 @@
 (function(Global, Base) {
+    var queryToJson = Base.Utils.queryToJson, clear = Base.Utils.clear;
     var Controller = new Base.Class({
         "__constructor__": function(config) {
             this.router = {};
@@ -31,18 +32,18 @@
             if(!(view = viewRouter.view)) {
                 require(viewUri, this.proxy(loadView));
             }else {
-                view.param = Base.Utils.queryToJson(viewInfo.query);
-                this.viewLoaded(view)
+                view.query = queryToJson(viewInfo.query);
+                this.viewLoaded(view, viewInfo.action)
             }
             return true
 
             function loadView(view) {
                 viewRouter.view = view;
-                view.param = Base.Utils.queryToJson(viewInfo.query);
+                view.query = queryToJson(viewInfo.query);
 
-                this.create(view, viewUri);
+                this.create(view, viewRouter);
                 this.render(view);
-                this.viewLoaded(view)
+                this.viewLoaded(view, viewInfo.action)
             }
         },
         "create": function(view, viewRouter) {
@@ -56,30 +57,32 @@
         "render": function(view) {
             this.config.MAIN_CONTAINER.appendChild(view.el);
         },
-        "viewLoaded": function(view) {
+        "viewLoaded": function(view, action) {
             view.onLoad();
-            this.swapView(view);
-            view.start()
+            this.swapView(view, action)
         },
-        "swapView": function(view) {
+        "swapView": function(view, action) {
             var cView;
             (cView = this.currentView) &&
             !!(cView.el.style.display = "none") &&
             cView.onHide();
-
             this.currentView = view;
+            view.start(action);
             view.el.style.display = "";
             view.onShow();
         },
         "getViewInfo": function() {
-            var hash = location.hash.split("?");
+            var hash = decodeURIComponent(location.hash).split("!"),
+                hashInfo = hash.split("?"),
+                actionInfo = (hash[1]||"").split(":");
             return {
-                "path": (hash[0]|| "#"+this.config.VIEW_DEFAULT).replace("#", "\/"),
-                "query": hash[1]||""
+                "path": (hashInfo[0]||"#" + this.config.VIEW_DEFAULT).replace("#", "\/"),
+                "query": hashInfo[1]||"",
+                "action": {
+                    "name": actionInfo[1]||"",
+                    "args": clear(actionInfo).split(",")
+                }
             }
-        },
-        "getViewUri": function(viewpath) {
-            return this.config.VIEW_HOST + this.config.VIEW_BASE + viewpath
         },
         "createContainer": (function() {
             var id = 0, prefix = "rabbit-view-";
